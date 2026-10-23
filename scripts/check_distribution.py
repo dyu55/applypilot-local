@@ -26,6 +26,8 @@ def main() -> None:
     if not archives:
         raise SystemExit("No distribution archives found.")
     for path in archives:
+        if path.name == ".gitignore":
+            continue
         if path.suffix == ".whl":
             with zipfile.ZipFile(path) as archive:
                 for name in archive.namelist():

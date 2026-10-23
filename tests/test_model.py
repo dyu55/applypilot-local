@@ -56,3 +56,13 @@ def test_model_request_omits_profile_and_answer_bank():
     )
     data = json.loads(requests[0]["messages"][1]["content"])
     assert set(data) == {"job_description", "bullets"}
+
+
+@pytest.mark.parametrize("data", [{"choices": []}, {"choices": [{"message": {"content": None}}]}])
+def test_incomplete_model_output_fails_safely(data):
+    def post(*args, **kwargs):
+        return httpx.Response(200, json=data, request=httpx.Request("POST", "http://localhost"))
+
+    ranker = BulletRanker(ModelSettings(model="example"), post=post)
+    with pytest.raises(ValueError, match="preserved"):
+        ranker.order(["A verified source fact"], "A job excerpt")

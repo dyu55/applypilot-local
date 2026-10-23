@@ -1,6 +1,7 @@
 """Loopback-only UI and API, with per-server request tokens and strict origins."""
 
 import secrets
+import zipfile
 from pathlib import Path
 from typing import Annotated, Literal
 from urllib.parse import urlsplit
@@ -9,6 +10,7 @@ from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field, ValidationError
+from pypdf.errors import PyPdfError
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from applypilot import __version__
@@ -143,7 +145,7 @@ def create_app(workspace: Workspace | None = None) -> FastAPI:
         filename = Path(file.filename or "resume.txt").name
         try:
             text = extract_resume(filename, content)
-        except (OSError, LookupError) as exc:
+        except (OSError, LookupError, PyPdfError, zipfile.BadZipFile) as exc:
             raise HTTPException(
                 400, "The resume could not be read. Try a text or Markdown file."
             ) from exc

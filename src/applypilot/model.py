@@ -84,7 +84,14 @@ class BulletRanker:
                     "The model did not return a complete permutation of source bullets."
                 )
             return order
-        except (httpx.HTTPError, KeyError, TypeError, ValueError) as exc:
+        except (
+            httpx.HTTPError,
+            KeyError,
+            TypeError,
+            ValueError,
+            AttributeError,
+            IndexError,
+        ) as exc:
             raise ValueError(
                 "Model ordering failed. Original resume facts have been preserved."
             ) from exc

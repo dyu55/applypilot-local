@@ -1,5 +1,6 @@
 """Complete local API flows, private-origin controls, and safe material delivery."""
 
+import pytest
 from fastapi.testclient import TestClient
 
 from applypilot.web import create_app
@@ -87,3 +88,12 @@ def test_no_source_returns_actionable_error(client):
     response = client.post("/api/collect")
     assert response.status_code == 400
     assert "Settings" in response.json()["detail"]
+
+
+@pytest.mark.parametrize("filename", ["invalid.pdf", "invalid.docx"])
+def test_corrupt_upload_is_an_actionable_error(client, filename):
+    response = client.post(
+        "/api/resumes/upload", files={"file": (filename, b"not a valid document")}
+    )
+    assert response.status_code == 400
+    assert "could not be read" in response.json()["detail"]

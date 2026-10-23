@@ -1,6 +1,7 @@
 """Read-only public job sources. No application submission endpoints are called."""
 
 import csv
+import html
 import io
 import ipaddress
 import json
@@ -21,8 +22,8 @@ from applypilot.domain import Job, Profile, Source
 MAX_DOWNLOAD = 3_000_000
 
 
-def plain(html: str) -> str:
-    soup = BeautifulSoup(html or "", "html.parser")
+def plain(content: str) -> str:
+    soup = BeautifulSoup(html.unescape(content or ""), "html.parser")
     for tag in soup(["script", "style", "noscript"]):
         tag.decompose()
     return soup.get_text(" ", strip=True)

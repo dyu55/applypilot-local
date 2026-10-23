@@ -35,8 +35,10 @@ Issues = "https://github.com/dyu55/applypilot-local/issues"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/applypilot"]
+core-metadata-version = "2.4"
 
 [tool.hatch.build.targets.sdist]
+core-metadata-version = "2.4"
 include = ["src/", "tests/", "scripts/", "docs/", "examples/", "README.md", "LICENSE", "CONTRIBUTING.md", "pyproject.toml", "uv.lock", "requirements-dev.lock"]
 
 [tool.ruff]
