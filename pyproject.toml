@@ -1,0 +1,55 @@
+[build-system]
+requires = ["hatchling>=1.27,<2"]
+build-backend = "hatchling.build"
+
+[project]
+name = "applypilot-local"
+version = "0.1.0"
+description = "A private, local-first job search workspace for every career."
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+authors = [{name = "ApplyPilot Local contributors"}]
+dependencies = [
+  "beautifulsoup4>=4.13,<5",
+  "fastapi>=0.115,<1",
+  "httpx>=0.28,<1",
+  "platformdirs>=4.3,<5",
+  "pydantic>=2.10,<3",
+  "pypdf>=6,<7",
+  "python-multipart>=0.0.20,<1",
+  "reportlab>=4.4,<5",
+  "uvicorn>=0.34,<1",
+]
+
+[project.optional-dependencies]
+dev = ["build>=1.2,<2", "pytest>=8.3,<10", "pytest-cov>=6,<8", "ruff>=0.11,<1", "twine>=6,<7"]
+browser = ["playwright>=1.50,<2"]
+
+[project.scripts]
+applypilot = "applypilot.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/dyu55/applypilot-local"
+Issues = "https://github.com/dyu55/applypilot-local/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/applypilot"]
+
+[tool.hatch.build.targets.sdist]
+include = ["src/", "tests/", "scripts/", "docs/", "README.md", "LICENSE", "pyproject.toml", "uv.lock"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+
+[tool.coverage.run]
+source = ["applypilot"]
+
