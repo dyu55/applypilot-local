@@ -1,19 +1,24 @@
 # Contributing
 
-Use Python 3.11 or newer, create a virtual environment, and follow the development
-commands in the README. Repository content is English-only. No frontend build is required.
+This is a portable agent skill. Keep instructions useful to both Codex and Claude Code, and keep the user experience conversational. Add scripts only for deterministic work that is worth reusing.
 
-Open an issue with a concrete problem, expected behavior, and a minimal fictional example.
-Do not attach real resumes, private employer correspondence, application records, secrets,
-or browser sessions. Redact screenshots before sharing them.
+Use fictional examples and reserved domains. Never commit candidate data, private workspace files, credentials, browser sessions, generated PDFs, or application histories. All maintained content must be English.
 
-Pull requests should describe the behavior changed and how it was validated. Add tests for
-data integrity, factual boundaries, parsing behavior, and user-visible bugs. Tests must run
-offline unless explicitly designated as manual live-source checks.
+For development, create a Python 3.11+ virtual environment outside the installed skill. Install the hash-locked requirements, then run:
 
-Job-source adapters must be read-only, bounded, respect attribution, and report partial
-failures. They must not bypass anti-bot protections or invoke application submission endpoints.
-Do not silently infer salary currency, work authorization, sponsorship, or personal identity.
+```sh
+python -m pip install --require-hashes -r requirements-dev.lock
+ruff check .
+ruff format --check .
+python scripts/check_repository.py
+python scripts/validate_skill.py
+python -m pytest
+python scripts/build_skill.py
+python scripts/smoke_skill.py
+```
 
-Before requesting review, run lint, format checks, the repository content check, tests, and
-package validation. Use separate profiles and temporary directories for test data.
+The project is not a Python application package; do not add an executable entry point or a web server. The ZIP contains the skill folder and its required resources. Update VERSION for a new release. Dispatch the Release workflow with a matching tag after CI succeeds for that exact commit.
+
+Dependency updates use `uv pip compile requirements-dev.in --generate-hashes --output-file requirements-dev.lock`. Keep runtime PDF requirements in the skill folder so a copied skill is self-contained. Re-run fixture tests after dependency changes.
+
+Use evals/scenarios.json to assess agent behavior in the target host before claiming a host-level integration passed. Record tools available, prompts, generated artifacts, and observed limitations. A schema check is not evidence that an agent followed every instruction.

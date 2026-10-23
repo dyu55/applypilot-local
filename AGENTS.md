@@ -1,12 +1,13 @@
 # Project instructions
 
-- Write all repository content, interface copy, documentation, examples, and comments in English.
-- Keep candidate data in the runtime data directory. Never copy personal application workspaces.
-- Use fictional identities and reserved example domains in tests and screenshots.
-- Preserve source facts. Model output must never become a confirmed personal fact automatically.
+- This repository distributes an agent skill. Keep the user experience conversational.
+- Write all repository content, documentation, examples, comments, and generated templates in English.
+- Keep the same SKILL.md usable by Codex and Claude Code without host-specific tool names.
+- Keep candidate information and generated batches outside this repository and installed skill folders.
+- Use fictional identities and reserved example domains in tests.
+- Preserve source facts; distinguish agent drafts from user-confirmed answers.
 - Keep posting availability, material readiness, and submission status separate.
-- Only record Submitted with a confirmation reference; distinguish user reports from verified evidence.
-- Keep the default server on loopback and preserve request-token and origin checks.
-- Run lint, formatting checks, repository checks, and the relevant tests before committing.
-- Verify the built package in a fresh environment before publishing a release.
-- Update documentation when changing user-visible behavior or support claims.
+- Preparation and handoff do not authorize submission or prove that an application was submitted.
+- Preserve published batches; publish complete new runs atomically inside date-named folders.
+- Run lint, formatting, repository checks, skill validation, and relevant helper tests before committing.
+- Test the extracted skill archive in an isolated directory before releasing it.
