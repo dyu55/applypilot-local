@@ -19,6 +19,6 @@ python scripts/smoke_skill.py
 
 The project is not a Python application package; do not add an executable entry point or a web server. The ZIP contains the skill folder and its required resources. Update VERSION for a new release. Dispatch the Release workflow with a matching tag after CI succeeds for that exact commit.
 
-Dependency updates use `uv pip compile requirements-dev.in --generate-hashes --output-file requirements-dev.lock`. Keep runtime PDF requirements in the skill folder so a copied skill is self-contained. Re-run fixture tests after dependency changes.
+Dependency updates use `uv pip compile requirements-dev.in --universal --python-version 3.11 --generate-hashes --output-file requirements-dev.lock`. Keep runtime PDF requirements in the skill folder so a copied skill is self-contained. Re-run fixture tests after dependency changes.
 
 Use evals/scenarios.json to assess agent behavior in the target host before claiming a host-level integration passed. Record tools available, prompts, generated artifacts, and observed limitations. A schema check is not evidence that an agent followed every instruction.
