@@ -37,7 +37,7 @@ Issues = "https://github.com/dyu55/applypilot-local/issues"
 packages = ["src/applypilot"]
 
 [tool.hatch.build.targets.sdist]
-include = ["src/", "tests/", "scripts/", "docs/", "README.md", "LICENSE", "pyproject.toml", "uv.lock"]
+include = ["src/", "tests/", "scripts/", "docs/", "examples/", "README.md", "LICENSE", "CONTRIBUTING.md", "pyproject.toml", "uv.lock", "requirements-dev.lock"]
 
 [tool.ruff]
 line-length = 100

@@ -20,5 +20,7 @@ runtime/
 *.log
 playwright-report/
 test-results/
+output/
+.playwright-cli/
 .DS_Store
 

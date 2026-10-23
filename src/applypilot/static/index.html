@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="workspace-token" content="__WORKSPACE_TOKEN__">
+  <meta name="description" content="Your private, local-first job search workspace.">
+  <title>ApplyPilot Local</title>
+  <link rel="icon" href="/static/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="/static/app.js" defer></script>
+</head>
+<body>
+  <aside class="sidebar">
+    <a class="brand" href="#overview" aria-label="ApplyPilot home"><img src="/static/icon.svg" alt="" width="35" height="35"><span>applypilot<span class="brand-local">LOCAL</span></span></a>
+    <p class="nav-label">YOUR WORKSPACE</p>
+    <nav aria-label="Main navigation">
+      <a href="#overview" data-view="overview"><span class="nav-icon">&#9638;</span> Overview</a>
+      <a href="#opportunities" data-view="opportunities"><span class="nav-icon">&#9671;</span> Opportunities <span id="nav-count" class="nav-count">0</span></a>
+      <a href="#resumes" data-view="resumes"><span class="nav-icon">&#9633;</span> Resumes</a>
+      <a href="#answers" data-view="answers"><span class="nav-icon">&#9776;</span> Answer bank</a>
+      <a href="#settings" data-view="settings"><span class="nav-icon">&#9881;</span> Settings</a>
+    </nav>
+    <div class="privacy-card"><span class="privacy-dot"></span><strong>Your search. Your space.</strong><p>Personal data stays in your local workspace. No account required.</p><span class="subtle-label">PRIVATE BY DEFAULT</span></div>
+    <div class="account"><span class="avatar" id="avatar">AP</span><div><strong id="account-name">Your workspace</strong><small id="profile-id">Local profile</small></div><span class="online-dot" title="Local workspace"></span></div>
+  </aside>
+  <div class="main-shell">
+    <header class="topbar"><div><span class="breadcrumb">Workspace</span><span class="slash">/</span><span id="page-name">Overview</span></div><div class="topbar-right"><span class="local-badge"><i></i> Running locally</span><a href="https://github.com/dyu55/applypilot-local" target="_blank" rel="noopener noreferrer" class="github-link">GitHub &#8599;</a></div></header>
+    <main id="content" tabindex="-1"><div class="loading">Opening your workspace...</div></main>
+    <footer>Built for your next chapter.<span>ApplyPilot Local <span id="version">v0.1.0</span></span></footer>
+  </div>
+  <dialog id="modal" aria-labelledby="modal-title"><div id="modal-content"></div></dialog>
+  <div id="toast" role="status" aria-live="polite" hidden></div>
+</body>
+</html>

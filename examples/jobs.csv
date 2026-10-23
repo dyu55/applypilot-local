@@ -1,0 +1,3 @@
+title,company,url,location,description,salary_max,currency,period,remote,country
+Operations Analyst,Example Operations,https://example.com/fictional/operations,"London, GB",Excel forecasting and process improvement,55000,GBP,year,false,GB
+Product Designer,Example Design,https://example.com/fictional/design,"Remote, US",Figma research prototyping and accessibility,105000,USD,year,true,US
