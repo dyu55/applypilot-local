@@ -75,4 +75,6 @@ GitHub Actions checks skill structure/references, English-only repository conten
 
 Tests validate deterministic helpers and fictional fixtures. They do not prove end-to-end execution in every Codex/Claude Code version, live job-site access, truthful agent judgment, or Muse compatibility. See [behavioral scenarios](evals/scenarios.json) for host-level acceptance checks and [CONTRIBUTING.md](CONTRIBUTING.md) for development.
 
+The [v0.2 host acceptance record](evals/host-acceptance.md) documents actual Codex runs, measured two-source concurrency, generated PDFs, partial/blocked reporting, and same-day preservation. Claude Code model access was unavailable in the test environment, so its behavioral acceptance remains unverified.
+
 [Skill entry point](skills/applypilot-local/SKILL.md) · [MIT license](LICENSE)

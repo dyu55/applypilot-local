@@ -34,6 +34,8 @@ Include `workflow_checks` for `intake`, `deduplication`, `screening`, `ranking`,
 
 Include `collection_execution` with actual `mode` (`parallel` or `sequential`), `max_in_flight`, and `detail`. Use the strategy's source IDs in `source_reports`, including blocked/not-checked sources, so missing coverage is visible. For each selected job, include consecutive `rank`, `role_family`, nonempty `ranking_reasons`, `selection_tier` (`primary` or `fallback`), and `fallback_rules_used` (empty for primary jobs). Fallback requires explicit opt-in and matching allowed rules. Selection ranks remain stable even when concurrent collectors finish in a different order.
 
+`batch.json.pending_questions` is a list of nonempty text summaries, such as `["Confirm Canadian sponsorship needs; scope: Canada roles."]`. Keep full question objects with IDs, scope, provenance, and status in `state/questions.json`; do not copy those objects into this batch field. Use an empty list when no questions remain.
+
 The following older `schema_version: 1` example is retained only for reading/migrating legacy drafts. Legacy inputs are accepted with a warning and cannot get a clean v0.2 PASS. Do not use legacy mode to bypass first-run setup for a new user:
 
 ```json
