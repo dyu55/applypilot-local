@@ -62,6 +62,7 @@ def test_shortfall_and_sources_are_separate(tmp_path):
     stage = tmp_path / "stage"
     data = fixture(stage, SKILL)
     data["requested_count"] = 2
+    data["strategy"]["target_count"] = 2
     data["source_reports"][0]["outcome"] = "blocked"
     save(stage, data)
     result = publish(stage, tmp_path / "batches")

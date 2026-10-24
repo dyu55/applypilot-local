@@ -4,7 +4,15 @@ import argparse
 import json
 from pathlib import Path
 
-from batch_lib import GENERATED_FILES, read_json, require, safe_file, sha256, validate
+from batch_lib import (
+    BASE_GENERATED_FILES,
+    GENERATED_FILES,
+    read_json,
+    require,
+    safe_file,
+    sha256,
+    validate,
+)
 
 
 def check(root):
@@ -24,7 +32,8 @@ def check(root):
             if file.is_file() and file != manifest_path
         }
         require(set(hashes) == actual, "Published file inventory changed.")
-        require(GENERATED_FILES - {"manifest.json"} <= actual, "Published indexes are missing.")
+        required = GENERATED_FILES if manifest["schema_version"] == 2 else BASE_GENERATED_FILES
+        require(required - {"manifest.json"} <= actual, "Published indexes are missing.")
         for relative, expected in hashes.items():
             require(
                 sha256(safe_file(root, relative)) == expected, f"Published file changed: {relative}"

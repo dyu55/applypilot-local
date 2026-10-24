@@ -36,6 +36,8 @@ def validate(folder=SKILL):
                 raise ValueError(f"Missing or external skill reference: {target}")
     for helper in (
         "batch_lib.py",
+        "strategy.py",
+        "daily_report.py",
         "render_resume.py",
         "publish_batch.py",
         "validate_batch.py",

@@ -10,6 +10,8 @@ batches/
       batch.json
       manifest.json
       APPLY_ORDER.md
+      DAILY_REPORT.md
+      daily_report.json
       applications.csv
       HANDOFF.md
       handoff.json
@@ -26,7 +28,13 @@ The run ID is unique, with letters, digits, hyphens, or underscores. Keep all fi
 
 ## Agent-generated input
 
-Create `batch.json` in a private staging folder. This minimal fictional example demonstrates an incomplete offline batch:
+New runs use `schema_version: 2`. Create `batch.json` in private staging and include the confirmed `strategy` object from `state/strategy.json`; its shape is documented in [preferences.md](preferences.md). `requested_count` must match the user's `target_count`. First-run setup must be complete before a new run can publish.
+
+Include `workflow_checks` for `intake`, `deduplication`, `screening`, `ranking`, and `resume_routing`. Each has `status` (`pass`, `warning`, `failed`, or `not_run`) and a concrete `detail`. These are agent attestations, not independently measured by the helper. Do not mark missing historical coverage or an unperformed check as passed.
+
+Include `collection_execution` with actual `mode` (`parallel` or `sequential`), `max_in_flight`, and `detail`. Use the strategy's source IDs in `source_reports`, including blocked/not-checked sources, so missing coverage is visible. For each selected job, include consecutive `rank`, `role_family`, nonempty `ranking_reasons`, `selection_tier` (`primary` or `fallback`), and `fallback_rules_used` (empty for primary jobs). Fallback requires explicit opt-in and matching allowed rules. Selection ranks remain stable even when concurrent collectors finish in a different order.
+
+The following older `schema_version: 1` example is retained only for reading/migrating legacy drafts. Legacy inputs are accepted with a warning and cannot get a clean v0.2 PASS. Do not use legacy mode to bypass first-run setup for a new user:
 
 ```json
 {
@@ -109,6 +117,20 @@ These are implementation helpers for the agent, not a user-facing workflow inter
 
 `manifest.json` records counts, shortfall, job decisions, source health, PDF text checks, review attestations, and SHA-256 hashes. It labels readiness `ready`, `partial`, or `blocked`. Source failures remain separate. A zero-ready run is blocked, even when the helper exits successfully after preserving useful drafts. Read the returned status; process exit alone is not a readiness claim.
 
-`APPLY_ORDER.md` and `handoff.json` contain only ready jobs. `applications.csv` and the manifest include drafts, unresolved jobs, and exclusions. All handoffs start with `submission_authorized: false` and zero verified submissions. A Muse recipient can read the local files under separately supplied instructions; this version does not implement a Muse protocol or integration.
+`APPLY_ORDER.md` and `handoff.json` contain only ready jobs; a BLOCKED report leaves their application queues empty until a corrected new run passes review. `applications.csv` and the manifest include drafts, unresolved jobs, and exclusions. All handoffs start with `submission_authorized: false`. A Muse recipient can read the local files under separately supplied instructions; this version does not implement a Muse protocol or integration.
 
-After publication, validate hashes and return the exact run path and latest pointer. Later application attempts go into private state, not edits to the immutable batch. If publication fails, keep staging for diagnosis and report the failure. A stale `.publish.lock` requires inspecting the active writer before removal; never delete another running publication's lock.
+After publication, validate hashes and return the exact run path and latest pointer. This preparation workflow ends at the daily report and optional file handoff; it does not request or write back application outcomes. If publication fails, keep staging for diagnosis and report the failure. A stale `.publish.lock` requires inspecting the active writer before removal; never delete another running publication's lock.
+
+## Required daily preparation report
+
+Publishing always creates `DAILY_REPORT.md` and `daily_report.json`, hashes them with the other files, and returns `report_result` alongside material readiness. Return the report path and summarize it in conversation after every run.
+
+The report separates jobs recorded/selected/ready, resume PDF files prepared, PDF text checks passed, editable resumes, target, and shortfall. It lists each workflow section, its evidence basis, problems, source coverage and actual collection mode, quotas, fallback usage, and pending questions. A PDF file prepared as a draft is counted as a prepared file, not as a validated ready application.
+
+- `PASS`: target and role quotas met; all recorded preparation checks passed; no unresolved issues.
+- `WARN`: useful ready materials exist, but there are source limitations, omitted/unperformed checks, incomplete selected materials, quota shortfalls, or pending user input.
+- `BLOCKED`: zero jobs are ready or a workflow check explicitly failed.
+
+`manifest.status` still describes material availability (`ready`, `partial`, `blocked`). `report_result` describes the whole recorded preparation review; it can be WARN/BLOCKED even when some materials are ready. Do not hide that result behind a successful process exit or a ready PDF count.
+
+Fact review, live source observations, concurrency observations, and page inspection are agent attestations; file checks, counts, and PDF extraction are helper checks. PASS applies to this recorded preparation scope, not submission or a guarantee that the agent's factual judgment is correct. There is no Muse result writeback, receipt collection, or application monitoring stage.

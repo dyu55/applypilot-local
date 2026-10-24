@@ -32,6 +32,10 @@ def smoke(archive=None):
         )
         published = json.loads(result.stdout)
         assert published["status"] == "ready"
+        assert published["report_result"] == "PASS"
+        report = json.loads((Path(published["path"]) / "daily_report.json").read_text())
+        assert report["counts"]["resume_pdfs_prepared"] == 1
+        assert report["issues"] == []
         result = subprocess.run(
             [sys.executable, str(skill / "scripts/validate_batch.py"), published["path"]],
             check=True,

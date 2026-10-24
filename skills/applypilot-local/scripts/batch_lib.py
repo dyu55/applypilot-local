@@ -9,13 +9,14 @@ from pathlib import Path, PurePosixPath
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 REQUIRED_FILES = {"resume_pdf", "resume_md", "job_description", "notes", "fact_map"}
-GENERATED_FILES = {
+BASE_GENERATED_FILES = {
     "manifest.json",
     "APPLY_ORDER.md",
     "applications.csv",
     "handoff.json",
     "HANDOFF.md",
 }
+GENERATED_FILES = BASE_GENERATED_FILES | {"DAILY_REPORT.md", "daily_report.json"}
 
 
 def require(condition, message):
@@ -114,7 +115,8 @@ def validate(root):
     root = Path(root).resolve()
     batch = read_json(root / "batch.json")
     require(
-        isinstance(batch, dict) and batch.get("schema_version") == 1, "Unsupported batch schema."
+        isinstance(batch, dict) and batch.get("schema_version") in {1, 2},
+        "Unsupported batch schema.",
     )
     day = text(batch.get("date"), "Date")
     require(re.fullmatch(r"\d{4}-\d{2}-\d{2}", day) is not None, "Use a YYYY-MM-DD date.")
@@ -240,4 +242,8 @@ def validate(root):
         text(question, "Pending question")
     summary["requested"] = target
     summary["shortfall"] = max(0, target - summary["ready"])
+    if batch["schema_version"] == 2:
+        from strategy import validate_strategy
+
+        validate_strategy(batch)
     return batch, summary, quality

@@ -14,6 +14,7 @@ from batch_lib import (
     validate,
     write_json,
 )
+from daily_report import build_report
 
 
 def csv_safe(value):
@@ -22,6 +23,8 @@ def csv_safe(value):
 
 
 def indexes(stage, batch, summary, quality):
+    report = build_report(stage, batch, summary, quality)
+    write_json(stage / "daily_report.json", report)
     records = []
     lines = [
         f"# Application order: {batch['date']}",
@@ -29,9 +32,14 @@ def indexes(stage, batch, summary, quality):
         f"Ready: {summary['ready']}/{summary['requested']}. Shortfall: {summary['shortfall']}.",
         "",
         "Prepared materials do not mean an application was submitted.",
+        f"Preparation report: {report['result']}. Read DAILY_REPORT.md before using this order.",
         "",
     ]
     ready = [job for job in batch["jobs"] if job["materials"]["status"] == "ready"]
+    if report["result"] == "BLOCKED":
+        ready = []
+    if batch["schema_version"] == 2:
+        ready.sort(key=lambda job: job["rank"])
     for number, job in enumerate(ready, 1):
         record = {
             "order": number,
@@ -41,6 +49,7 @@ def indexes(stage, batch, summary, quality):
             "url": job["url"],
             "files": job["materials"]["files"],
             "application_status": "Pending",
+            "selection_rank": job.get("rank", number),
         }
         records.append(record)
         lines.extend(
@@ -52,7 +61,9 @@ def indexes(stage, batch, summary, quality):
             ]
         )
     if not ready:
-        lines.append("No jobs passed every readiness check. Review the manifest and drafts.")
+        lines.append(
+            "No jobs are listed: the batch is blocked or no jobs are ready. Read the report."
+        )
     lines.extend(["", "## Pending questions", ""])
     lines.extend(f"- {item}" for item in batch.get("pending_questions", []))
     if not batch.get("pending_questions"):
@@ -95,27 +106,29 @@ def indexes(stage, batch, summary, quality):
             "run_id": batch["run_id"],
             "date": batch["date"],
             "submission_authorized": False,
+            "report_result": report["result"],
             "path_base": "this folder",
             "applications": records,
             "pending_questions": batch.get("pending_questions", []),
             "instructions": (
                 "Review availability and materials. Obtain separate submission instructions. "
-                "Record confirmation references; never treat preparation as submission."
+                "This preparation skill does not collect or write back application results."
             ),
         },
     )
     (stage / "HANDOFF.md").write_text(
         "# Manual application or Muse handoff\n\n"
-        "Read APPLY_ORDER.md and handoff.json. All file paths are relative to this folder.\n\n"
+        "Read DAILY_REPORT.md, APPLY_ORDER.md, and handoff.json. "
+        "All file paths are relative to this folder. Resolve a BLOCKED report before use.\n\n"
         "This is a local file handoff, not a tested Muse API integration. "
         "Nothing was sent or submitted. Creating these files does not authorize applications. "
         "Follow the user's separate instructions, "
         "resolve pending questions, recheck posting availability, and review each upload. "
-        "Record confirmation references for verified submissions in private application state.\n",
+        "This skill finishes at preparation and does not request or write back Muse results.\n",
         encoding="utf-8",
     )
     manifest = {
-        "schema_version": 1,
+        "schema_version": batch["schema_version"],
         "date": batch["date"],
         "run_id": batch["run_id"],
         "created_at": batch["created_at"],
@@ -127,6 +140,9 @@ def indexes(stage, batch, summary, quality):
         else "blocked",
         "summary": summary,
         "source_reports": batch["source_reports"],
+        "report_result": report["result"],
+        "strategy": batch.get("strategy"),
+        "collection_execution": batch.get("collection_execution"),
         "source_health": "ok"
         if all(item["outcome"] == "ok" for item in batch["source_reports"])
         else "degraded",
@@ -200,7 +216,12 @@ def publish(source, output):
                 },
             )
             pointer.replace(day / "latest.json")
-        return {"path": str(destination), "status": manifest["status"], "summary": summary}
+        return {
+            "path": str(destination),
+            "status": manifest["status"],
+            "summary": summary,
+            "report_result": manifest["report_result"],
+        }
     finally:
         lock.unlink(missing_ok=True)
 

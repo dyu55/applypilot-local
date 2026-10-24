@@ -85,7 +85,7 @@ def fixture(stage, skill, ready=True, run_id="fixture-run"):
         )
         files["resume_pdf"] = "jobs/design-01/resume.pdf"
     batch = {
-        "schema_version": 1,
+        "schema_version": 2,
         "date": "2026-10-23",
         "run_id": run_id,
         "created_at": "2026-10-23T09:00:00+00:00",
@@ -114,6 +114,11 @@ def fixture(stage, skill, ready=True, run_id="fixture-run"):
                     "checked_at": "2026-10-23T09:00:00+00:00",
                 },
                 "decision": "selected",
+                "rank": 1,
+                "role_family": "Product Designer",
+                "ranking_reasons": ["Matches the fictional user's recorded design preference."],
+                "selection_tier": "primary",
+                "fallback_rules_used": [],
                 "reasons": ["Fixture design experience matches the fixture description."],
                 "application_status": "Pending",
                 "materials": {
@@ -126,8 +131,54 @@ def fixture(stage, skill, ready=True, run_id="fixture-run"):
             }
         ],
     }
+    batch["strategy"] = strategy()
+    batch["workflow_checks"] = {
+        name: {"status": "pass", "detail": "Simulated review for a fictional test fixture."}
+        for name in ("intake", "deduplication", "screening", "ranking", "resume_routing")
+    }
+    batch["collection_execution"] = {
+        "mode": "sequential",
+        "max_in_flight": 1,
+        "detail": "One fictional source; no network calls were made.",
+    }
     save(stage, batch)
     return batch
+
+
+def strategy():
+    groups = (
+        "roles",
+        "levels",
+        "employers",
+        "locations",
+        "work_arrangement",
+        "skills",
+        "compensation",
+        "employment",
+        "eligibility",
+        "freshness",
+        "materials",
+        "delivery",
+        "other",
+    )
+    preferences = {name: {"status": "no_preference"} for name in groups}
+    preferences["roles"] = {"status": "answered", "value": ["Product Designer"]}
+    return {
+        "setup_complete": True,
+        "confirmed_at": "2026-10-23T09:00:00+00:00",
+        "target_count": 1,
+        "preferences": preferences,
+        "role_quotas": {},
+        "ranking": {"criteria": ["roles", "levels"]},
+        "collection": {
+            "mode": "parallel",
+            "max_parallel": 3,
+            "sources": ["Fictional fixture"],
+            "retry_limit": 2,
+            "timeout_seconds": 120,
+        },
+        "fallback": {"enabled": False, "allowed_relaxations": []},
+    }
 
 
 def save(stage, batch):

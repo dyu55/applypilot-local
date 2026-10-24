@@ -1,55 +1,42 @@
-# Candidate intake and persistent state
+# First-run conversation and persistent state
 
-The agent creates and maintains these local files. Start with the resume and preferences already supplied in the conversation or identified workspace; do not ask the user to repeat them.
+On first use, proactively lead the user through setup before researching jobs. Read supplied resumes and conversation details first, prefill supported answers, and ask the remaining questions in small conversational groups. The agent writes the files; the user should not have to edit JSON or operate commands.
 
-Before the first search, establish:
+Read [preferences.md](preferences.md) for the full questionnaire and strategy snapshot. Every listed topic must be offered during first-run setup, including additional constraints the list does not anticipate. An explicit "no preference," "unknown," or "skip this preference" is a recorded answer. Silence is not an answer. Do not silently select a daily quota, country, seniority, employer type, ranking order, or fallback strategy.
 
-- A source resume or enough verified experience to prepare one.
-- Target role families and level, preferred locations, remote/hybrid/on-site constraints.
-- The desired batch size and search scope. If unspecified, start with five leads and explain that assumption.
-- A private output location. Suggest `applypilot-workspace` in a user-writable documents directory outside Git repositories; use the host's actual paths.
+Use three manageable rounds, adapting to answers already supplied:
 
-Ask about compensation, currency and pay period, authorization, sponsorship, relocation, or availability only when needed for screening or answers. Unknown is a valid value. Do not infer these facts from name, location, nationality, or resume history. A salary threshold without currency and period is incomplete. Do not turn a preference into a legal eligibility statement.
+1. Resume, role families and level, location/work arrangement, and desired ready-job count.
+2. Employer/industry and skill preferences, compensation, employment conditions, eligibility, and freshness.
+3. Ranking precedence, optional direction quotas, sources and collection concurrency, optional fallback, materials/output preferences, local date/time zone, and other constraints.
 
-Use a private state layout such as:
+Explain hard exclusions versus soft preferences. Ask the user to choose the order of competing preferences, such as role level, employer type, region, role family, skills, freshness, and application effort. These are examples, not fixed priorities. Do not universally prioritize banks, software companies, a country, or a technology stack.
+
+Ask explicitly whether fallback is enabled. Until the user opts in, keep it disabled and do not broaden criteria to fill a quota. When enabled, record exactly what may change, the order and limits of changes, and what must remain fixed. Missing user replies do not enable fallback. Unknown compensation/eligibility facts remain unknown and must not be guessed.
+
+Present a concise setup summary and obtain the user's confirmation of any new proposed settings. Reuse explicit answers already given; do not ask for a second approval of an already fully specified strategy. Save `setup_complete: true` with a timestamp only after the listed preference groups have recorded answers. On later runs, load the saved strategy and ask only about missing settings or requested changes.
+
+Keep private state outside the source repository and installed skill folder:
 
 ```text
 state/
   profile.json
-  rules.md
+  strategy.json
   resumes/
   answers.json
   questions.json
-  application_attempts.jsonl
 batches/
   YYYY-MM-DD/
     latest.json
     <run-id>/
 ```
 
-Store profile values with provenance, for example:
+`profile.json` contains candidate facts with source, scope, and confirmation time. `strategy.json` contains user-chosen search/preparation preferences; do not confuse preferences with legal or personal facts. Preserve original resumes privately with stable IDs. Optional preexisting application history can be read for duplicate avoidance, but this skill does not collect application outcomes or write back Muse results.
 
-```json
-{
-  "schema_version": 1,
-  "target_roles": ["Product Designer"],
-  "locations": ["Remote"],
-  "time_zone": "UTC",
-  "facts": {
-    "requires_sponsorship": {
-      "value": null,
-      "source": null,
-      "scope": null,
-      "confirmed_at": null
-    }
-  }
-}
-```
+An answer record includes `question`, `answer`, `scope`, `source`, `source_reference`, and `confirmed_at`. Use `user_confirmed` only for explicit answers and `resume_based_draft` for agent narration supported by a resume. Keep `confirmed_at` null for drafts. Deduplicate by meaning while preserving country, employer, time period, and authorization scope. New explicit answers supersede equivalent older answers within the same scope.
 
-An answer record includes `question`, `answer`, `scope`, `source`, `source_reference`, and `confirmed_at`. Use `user_confirmed` only for explicit user answers; use `resume_based_draft` for agent narration supported by a resume. Keep `confirmed_at` null for drafts. Normalize question wording for deduplication, but retain distinctions such as country, employer, time period, and authorization type. A newer explicit answer supersedes an older equivalent answer in the same scope.
+Unresolved questions include `question`, `scope`, `job_ids`, `reason`, and `status` (`pending` or `resolved`). Link repeated questions to the existing record. A generated draft does not resolve a missing factual answer. Behavioral answers can directly adapt verified resume experience; ask only when an essential event, action, or result is absent.
 
-Question records include `question`, `scope`, `job_ids`, `reason`, and `status` (`pending` or `resolved`). Link repeated questions to the existing record. A generated draft does not resolve a question requiring a confirmed fact.
+Before selecting jobs, read prior batch manifests and any history the user has already supplied. Match requisition within employer/source, otherwise normalized URLs with company/title/location as supporting evidence. Preserve posting-identifying query parameters. Note when historical coverage is incomplete.
 
-Read prior application attempts and published batch manifests before selecting jobs. Match requisition ID within employer/source when available, otherwise compare normalized URLs and company/title/location. Strip tracking parameters only; preserve parameters that identify the posting. Avoid duplicate applications across different aggregators.
-
-Keep resumes, contacts, answer banks, account details, cookies, credentials, and application history out of the skill directory, examples, release archives, and Git history. Do not require passwords, OTPs, or API keys to prepare a batch.
+Keep resumes, contacts, answers, account details, cookies, credentials, and private history out of the skill, examples, release archives, and Git history. No passwords, OTPs, or API keys are required for preparation.
